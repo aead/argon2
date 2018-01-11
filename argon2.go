@@ -6,6 +6,19 @@
 // Argon2 was selected as the winner of the Password Hashing Competition and can
 // be used to derive cryptographic keys from passwords.
 // Argon2 is specfifed at https://github.com/P-H-C/phc-winner-argon2/blob/master/argon2-specs.pdf
+//
+// This package implements the three different Argon2 variants:
+// - Argon2d:
+//   This version maximizes the bruteforce cost for an adversary but does not
+//   prevent information leakage by data-depended memory access. It should only
+//   be used in trusted environments.
+// - Argon2i:
+//   This version is designed to prevent information leakage through memory access.
+//   It is the recommended version of the Argon2 paper. However attacks against Argon2i
+//   exists which reduce the time-memory tradeoff costs depending on used parameters.
+// - Argon2id:
+//   This is version is a combination of Argon2i and Argon2d and combines the advantages
+//   of both versions. It is the recommended version of the RFC draft: https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03
 package argon2
 
 import (
@@ -40,6 +53,46 @@ const (
 // Remember to get a good random salt.
 func Key(password, salt []byte, time, memory uint32, threads uint8, keyLen uint32) []byte {
 	return deriveKey(argon2i, password, salt, nil, nil, time, memory, threads, keyLen)
+}
+
+// Key2d derives a key from the password, salt, and cost parameters using Argon2d
+// returning a byte slice of length keyLen that can be used as cryptographic key.
+// The CPU cost and parallism degree must be greater than zero.
+//
+// For example, you can get a derived key for e.g. AES-256 (which needs a 32-byte key) by doing:
+// `key := argon2.Key2d([]byte("some password"), salt, 1, 32*1024, 4, 32)`
+//
+// The recommended parameters for interactive logins as of 2017 are time=1, memory=32*1024.
+// According to the RFC draft a time=1 and the maximal available memory maximizes the attack
+// cost for a constant time defender.
+// The number of threads can be adjusted to the numbers of available CPUs.
+// The time parameter specifies the number of passes over the memory and the memory
+// parameter specifies the size of the memory in KiB. For example memory=32*1024 sets the
+// memory cost to ~32 MB.
+// The cost parameters should be increased as memory latency and CPU parallelism increases.
+// Remember to get a good random salt.
+func Key2d(password, salt []byte, time, memory uint32, threads uint8, keyLen uint32) []byte {
+	return deriveKey(argon2d, password, salt, nil, nil, time, memory, threads, keyLen)
+}
+
+// Key2id derives a key from the password, salt, and cost parameters using Argon2id
+// returning a byte slice of length keyLen that can be used as cryptographic key.
+// The CPU cost and parallism degree must be greater than zero.
+//
+// For example, you can get a derived key for e.g. AES-256 (which needs a 32-byte key) by doing:
+// `key := argon2.Key2id([]byte("some password"), salt, 1, 32*1024, 4, 32)`
+//
+// The recommended parameters for interactive logins as of 2017 are time=1, memory=32*1024.
+// According to the RFC draft a time=1 and the maximal available memory maximizes the attack
+// cost for a constant time defender.
+// The number of threads can be adjusted to the numbers of available CPUs.
+// The time parameter specifies the number of passes over the memory and the memory
+// parameter specifies the size of the memory in KiB. For example memory=32*1024 sets the
+// memory cost to ~32 MB.
+// The cost parameters should be increased as memory latency and CPU parallelism increases.
+// Remember to get a good random salt.
+func Key2id(password, salt []byte, time, memory uint32, threads uint8, keyLen uint32) []byte {
+	return deriveKey(argon2id, password, salt, nil, nil, time, memory, threads, keyLen)
 }
 
 func deriveKey(mode int, password, salt, secret, data []byte, time, memory uint32, threads uint8, keyLen uint32) []byte {
