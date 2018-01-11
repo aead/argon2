@@ -8,8 +8,8 @@ https://github.com/P-H-C/phc-winner-argon2/blob/master/argon2-specs.pdf
 
 ### Recommendation 
 This Argon2 implementation was submitted to the golang x/crypto repo.
-I recommend to use the official [x/crypto/argon2](https://godoc.org/golang.org/x/crypto/argon2) package if possible.  
-**Currently the x/crypto implementation contains a bug which is already fixed here and also pushed upstream.**
+I recommend to use the official [x/crypto/argon2](https://godoc.org/golang.org/x/crypto/argon2) package if possible.
+This repository also exports Argon2d and Argon2id. It is recommended to use Argon2id as described in the [RFC draft](https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03).
 
 ### Installation
 
